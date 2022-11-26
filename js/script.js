@@ -1,5 +1,6 @@
 $(function() {
 
+    
     $('#login-form-link').click(function(e) {
 		$("#login-form").delay(100).fadeIn(100);
  		$("#register-form").fadeOut(100);
@@ -15,5 +16,15 @@ $(function() {
 		e.preventDefault();
 	});
 
+  
+
+});
+
+$(function() {
+  $('#register-submit').cluck(function(e){
+      localStorage.setItem("registro","1");
+    alert("12321");
+       
+    });
 });
 
