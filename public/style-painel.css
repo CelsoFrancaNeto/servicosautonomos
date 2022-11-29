@@ -1,0 +1,46 @@
+html {
+    padding: 0;
+    margin: 0;
+    border: 0;
+}
+.navbar-brand {
+    margin: 0;
+    padding: 0;
+}
+header {
+    padding-bottom: 60px;
+}
+
+p.formulario {
+    text-align: center;
+    margin: 16px;
+    font-weight: bold;
+}
+div.modal-body {
+    padding-top: 0px;
+}
+#IDConfirmarServ, #TituloConfirmarServ, #TipoConfirmarServ, #PrevisaoConfirmarServ, 
+#ValorConfirmarServ {
+    border: none;
+    text-align: center;
+    background-color: white;
+}
+#ValorConfirmarServ {
+    color: green;
+}
+.servCamp {
+
+}
+#descCampForm {
+    height: 400px;
+}
+
+textarea {
+    background-color: white;
+    border: none;
+    resize: none;
+}
+
+#system-search {
+    margin: 10px;
+}

@@ -2,38 +2,42 @@
 include "../configDB/connect.php";
 include "../login/protect.php";
 
+$cpf = $_SESSION['user'];
+
 $sql_code = "SELECT d.ID, t.Nome AS Tipo_Servico, d.Titulo, d.Descricao, d.Previsao, d.Preco, d.Endereco, d.Status
-FROM tipo_servico t JOIN servico d ON d.Tipo_Servico = t.ID AND d.status = 4;";
+FROM tipo_servico t JOIN servico d ON d.Tipo_Servico = t.ID AND d.status = 2 and d.Prestador = $cpf";
 $sql_query = $conn->query($sql_code) or die("Falha na execução do código SQL: " . $conn->error);
 $qtd = $sql_query->num_rows;
 
-if (isset($_POST['prestar-submit'])) {
+if (isset($_POST['finalizar-submit'])) {
     $id = $_POST['ID'];
-    $cpf = $_SESSION['user'];
-    $sql_baterProfissao = "SELECT count(*) FROM servico d JOIN tipo_servico t ON  d.ID = $id AND t.ID = d.Tipo_Servico JOIN usuario u ON u.cpf =  $cpf  AND u.profissao = t.ID_Profissao";
 
-    $sql_query2 = $conn->query($sql_baterProfissao) or die("Falha na execusão do código SQL: " . $conn->error);
+    $sql_setFinalDate = "UPDATE servico set Data_final = CURDATE() WHERE ID = $id";
+    $sql_setStatusConcluido = "UPDATE servico set Status = 1 WHERE ID = $id";
 
-    if ($sql_query2->num_rows == 1) {
-        $sql_ADD_Prestador = "UPDATE servico
-        set Prestador = $cpf WHERE ID = $id";
+    try {
+        $sql_query2 = $conn->query($sql_setFinalDate) or die("Falha em execução do código SQL:" . $conn->error);
+        $sql_query2 = $conn->query($sql_setStatusConcluido) or die("Falha em execução do código SQL:" . $conn->error);
+        header("Refresh:0");
+    } catch (mysqli_sql_exception $error) {
+        echo $error;
+    }
+}
 
-        $sql_ADD_Data_Inicio = "UPDATE servico
-        set Data_Inicio = CURDATE() WHERE ID = $id";
+if (isset($_POST['cancelar-submit'])) {
+    $id = $_POST['ID'];
 
-        $sql_IniciarServ = "UPDATE servico 
-        set Status = 2 WHERE ID = $id";
+    $sql_removePrestador = "UPDATE servico set Prestador = null WHERE ID = $id";
+    $sql_removeDataInicio = "UPDATE servico set Data_Inicio = null WHERE ID = $id";
+    $sql_setStatusDisponivel = "UPDATE servico set Status = 4 WHERE ID = $id";
 
-        try {
-            $sql_query3 = $conn->query($sql_ADD_Prestador) or die("Falha na execusão do código SQL: " . $conn->error);
-            $sql_query4 = $conn->query($sql_ADD_Data_Inicio) or die("Falha na execusão do código SQL: " . $conn->error);
-            $sql_query5 = $conn->query($sql_IniciarServ) or die("Falha na execusão do código SQL: " . $conn->error);
-            header("Refresh:0");
-        } catch (mysqli_sql_exception $error) {
-            echo $error;
-        }
-    }else {
-        //Do something...
+    try {
+        $sql_query_cancel = $conn->query($sql_removePrestador) or die("Falha em execução do código SQL:" . $conn->error);
+        $sql_query_cancel = $conn->query($sql_removeDataInicio) or die("Falha em execução do código SQL:" . $conn->error);
+        $sql_query_cancel = $conn->query($sql_setStatusDisponivel) or die("Falha em execução do código SQL:" . $conn->error);
+        header("Refresh: 0");
+    } catch (mysqli_sql_exception $error) {
+        echo $error;
     }
 }
 
@@ -65,17 +69,20 @@ if (isset($_POST['prestar-submit'])) {
             <div class="collapse navbar-collapse" id="collapsibleNavbar">
                 <ul class="navbar-nav">
                     <li class="nav-item">
+                        <a class="nav-link" href="painel.php">Home</a>
+                    </li>
+                    <li class="nav-item">
                         <a class="nav-link" href="#">Perfil</a>
                     </li>
                     <li class="nav-item">
                         <a class="nav-link" href="#">Criar Serviço</a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" href="services-progress.php">Serviços resposabilidade</a>
+                        <a class="nav-link" href="">Serviços resposabilidade</a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" href="">Meus serviços</a>
-                    </li>     
+                        <a class="nav-link" href="#">Meus serviços</a>
+                    </li>
                     <li class="nav-item">
                         <a class="nav-link" href="../login/logout.php">Sair</a>
                     </li>
@@ -126,7 +133,8 @@ if (isset($_POST['prestar-submit'])) {
                                     <td><textarea name="previsao" id="" cols="5" readonly><?php echo utf8_encode($dados['Previsao']) . " dias" ?></textarea></td>
                                     <td><textarea name="preco" id="" cols="10" readonly><?php echo utf8_encode($dados['Preco']) ?></textarea></td>
                                     <td><textarea name="status" id="" cols="10" readonly><?php echo utf8_encode($dados['Status']) ?></textarea></td>
-                                    <td><button type="submit" class="btn btn-success" name="prestar-submit">Prestar</button></td>
+                                    <td><button type="submit" class="btn btn-success" name="finalizar-submit">Finalizar</button></td>
+                                    <td><button type="submit" class="btn btn-danger" name="cancelar-submit">Cancelar</button></td>
                                 </tr>
                             </form>
 
