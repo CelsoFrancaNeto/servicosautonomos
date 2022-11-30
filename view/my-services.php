@@ -5,34 +5,17 @@ include "../login/protect.php";
 $cpf = $_SESSION['user'];
 
 $sql_code = "SELECT d.ID, t.Nome AS Tipo_Servico, d.Titulo, d.Descricao, d.Previsao, d.Preco, d.Endereco, d.Status
-FROM tipo_servico t JOIN servico d ON d.Tipo_Servico = t.ID AND d.status = 2 and d.Prestador = $cpf";
+FROM tipo_servico t JOIN servico d ON d.Tipo_Servico = t.ID  and d.Criador = $cpf";
 $sql_query = $conn->query($sql_code) or die("Falha na execução do código SQL: " . $conn->error);
 $qtd = $sql_query->num_rows;
-
-if (isset($_POST['finalizar-submit'])) {
-    $id = $_POST['ID'];
-
-    $sql_setStatusConcluido = "UPDATE servico set Status = 1 WHERE ID = $id";
-
-    try {
-        $sql_query2 = $conn->query($sql_setStatusConcluido) or die("Falha em execução do código SQL:" . $conn->error);
-        header("Refresh:0");
-    } catch (mysqli_sql_exception $error) {
-        echo $error;
-    }
-}
 
 if (isset($_POST['cancelar-submit'])) {
     $id = $_POST['ID'];
 
-    $sql_removePrestador = "UPDATE servico set Prestador = null WHERE ID = $id";
-    $sql_removeDataInicio = "UPDATE servico set Data_Inicio = null WHERE ID = $id";
-    $sql_setStatusDisponivel = "UPDATE servico set Status = 4 WHERE ID = $id";
+    $sql_remove_servico = "DELETE FROM servico WHERE ID = $id";
 
     try {
-        $sql_query_cancel = $conn->query($sql_removePrestador) or die("Falha em execução do código SQL:" . $conn->error);
-        $sql_query_cancel = $conn->query($sql_removeDataInicio) or die("Falha em execução do código SQL:" . $conn->error);
-        $sql_query_cancel = $conn->query($sql_setStatusDisponivel) or die("Falha em execução do código SQL:" . $conn->error);
+        $sql_query_cancel = $conn->query($sql_remove_servico) or die("Falha em execução do código SQL:" . $conn->error);
         header("Refresh: 0");
     } catch (mysqli_sql_exception $error) {
         echo $error;
@@ -76,10 +59,10 @@ if (isset($_POST['cancelar-submit'])) {
                         <a class="nav-link" href="create-service.php">Criar Serviço</a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" href="">Serviços resposabilidade</a>
+                        <a class="nav-link" href="services-progress.php">Serviços resposabilidade</a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" href="my-services.php">Meus serviços</a>
+                        <a class="nav-link" href="#">Meus serviços</a>
                     </li>
                     <li class="nav-item">
                         <a class="nav-link" href="../login/logout.php">Sair</a>
@@ -126,12 +109,11 @@ if (isset($_POST['cancelar-submit'])) {
                                 <tr>
                                     <td hidden><input type="text" value="<?php echo $dados['ID'] ?>" name="ID"></td>
                                     <td id="teste"><textarea name="tipo_servico" id="" cols="15" readonly><?php echo utf8_encode($dados['Tipo_Servico']) ?></textarea></td>
-                                    <td><textarea name="titulo" id="" cols="20" readonly><?php echo utf8_encode($dados['Titulo']) ?></textarea></td>
+                                    <td><textarea name="titulo" id="titulo" cols="20" readonly><?php echo utf8_encode($dados['Titulo']) ?></textarea></td>
                                     <td><textarea name="descricao" id="" cols="30" readonly><?php echo utf8_encode($dados['Descricao']) ?></textarea></td>
                                     <td><textarea name="previsao" id="" cols="5" readonly><?php echo utf8_encode($dados['Previsao']) . " dias" ?></textarea></td>
                                     <td><textarea name="preco" id="" cols="10" readonly><?php echo utf8_encode($dados['Preco']) ?></textarea></td>
                                     <td><textarea name="status" id="" cols="10" readonly><?php echo utf8_encode($dados['Status']) ?></textarea></td>
-                                    <td><button type="submit" class="btn btn-success" name="finalizar-submit">Finalizar</button></td>
                                     <td><button type="submit" class="btn btn-danger" name="cancelar-submit">Cancelar</button></td>
                                 </tr>
                             </form>
@@ -153,5 +135,8 @@ if (isset($_POST['cancelar-submit'])) {
 
     <script src="../js/script.js"></script>
 </body>
+
+
+
 
 </html>

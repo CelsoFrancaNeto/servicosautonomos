@@ -3,10 +3,12 @@ html {
     margin: 0;
     border: 0;
 }
+
 .navbar-brand {
     margin: 0;
     padding: 0;
 }
+
 header {
     padding-bottom: 60px;
 }
@@ -16,21 +18,27 @@ p.formulario {
     margin: 16px;
     font-weight: bold;
 }
+
 div.modal-body {
     padding-top: 0px;
 }
-#IDConfirmarServ, #TituloConfirmarServ, #TipoConfirmarServ, #PrevisaoConfirmarServ, 
+
+#IDConfirmarServ,
+#TituloConfirmarServ,
+#TipoConfirmarServ,
+#PrevisaoConfirmarServ,
 #ValorConfirmarServ {
     border: none;
     text-align: center;
     background-color: white;
 }
+
 #ValorConfirmarServ {
     color: green;
 }
-.servCamp {
 
-}
+.servCamp {}
+
 #descCampForm {
     height: 400px;
 }
@@ -43,4 +51,31 @@ textarea {
 
 #system-search {
     margin: 10px;
+}
+
+#submit-buttom {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+#submit-buttom button {
+    margin: 10px;
+}
+
+.form-control {
+
+    border: none;
+    background-color: #f8f9fa;
+
+}
+
+#exampleFormControlTextarea3 {
+    padding-bottom: 100px;
+}
+
+.error-mensage {
+    text-align: center;
+    color: green;
+    font-weight: bold;
 }

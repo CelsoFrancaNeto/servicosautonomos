@@ -65,16 +65,19 @@ if (isset($_POST['prestar-submit'])) {
             <div class="collapse navbar-collapse" id="collapsibleNavbar">
                 <ul class="navbar-nav">
                     <li class="nav-item">
+                        <a class="nav-link" href="painel.php">Home</a>
+                    </li>
+                    <li class="nav-item">
                         <a class="nav-link" href="#">Perfil</a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" href="#">Criar Serviço</a>
+                        <a class="nav-link" href="create-service.php">Criar Serviço</a>
                     </li>
                     <li class="nav-item">
                         <a class="nav-link" href="services-progress.php">Serviços resposabilidade</a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" href="">Meus serviços</a>
+                        <a class="nav-link" href="my-services.php">Meus serviços</a>
                     </li>     
                     <li class="nav-item">
                         <a class="nav-link" href="../login/logout.php">Sair</a>
