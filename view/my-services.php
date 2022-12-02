@@ -5,17 +5,30 @@ include "../login/protect.php";
 $cpf = $_SESSION['user'];
 
 $sql_code = "SELECT d.ID, t.Nome AS Tipo_Servico, d.Titulo, d.Descricao, d.Previsao, d.Preco, d.Endereco, d.Status
-FROM tipo_servico t JOIN servico d ON d.Tipo_Servico = t.ID  and d.Criador = $cpf";
+FROM tipo_servico t JOIN servico d ON d.Tipo_Servico = t.ID  AND d.status != 5 AND d.Criador = $cpf";
 $sql_query = $conn->query($sql_code) or die("Falha na execução do código SQL: " . $conn->error);
 $qtd = $sql_query->num_rows;
 
 if (isset($_POST['cancelar-submit'])) {
     $id = $_POST['ID'];
 
-    $sql_remove_servico = "DELETE FROM servico WHERE ID = $id";
+    $sql_code_remove_servico = "UPDATE servico set Status = 5 WHERE ID = $id";
 
     try {
-        $sql_query_cancel = $conn->query($sql_remove_servico) or die("Falha em execução do código SQL:" . $conn->error);
+        $sql_query_cancel = $conn->query($sql_code_remove_servico) or die("Falha em execução do código SQL:" . $conn->error);
+        header("Refresh: 0");
+    } catch (mysqli_sql_exception $error) {
+        echo $error;
+    }
+}
+
+if (isset($_POST['finalizar-submit'])) {
+    $id = $_POST['ID'];
+
+    $sql_code_update_status = "UPDATE servico SET Status = 1 WHERE ID = $id";
+
+    try {
+        $sql_query_update_status = $conn->query($sql_code_update_status) or die("Falha em execução do código SQL:" . $conn->error);
         header("Refresh: 0");
     } catch (mysqli_sql_exception $error) {
         echo $error;
@@ -53,7 +66,7 @@ if (isset($_POST['cancelar-submit'])) {
                         <a class="nav-link" href="painel.php">Home</a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" href="#">Perfil</a>
+                        <a class="nav-link" href="perfil.php">Perfil</a>
                     </li>
                     <li class="nav-item">
                         <a class="nav-link" href="create-service.php">Criar Serviço</a>
@@ -114,7 +127,19 @@ if (isset($_POST['cancelar-submit'])) {
                                     <td><textarea name="previsao" id="" cols="5" readonly><?php echo utf8_encode($dados['Previsao']) . " dias" ?></textarea></td>
                                     <td><textarea name="preco" id="" cols="10" readonly><?php echo utf8_encode($dados['Preco']) ?></textarea></td>
                                     <td><textarea name="status" id="" cols="10" readonly><?php echo utf8_encode($dados['Status']) ?></textarea></td>
-                                    <td><button type="submit" class="btn btn-danger" name="cancelar-submit">Cancelar</button></td>
+                                    <?php
+                                    if (utf8_decode($dados['Status']) == "Pendente") {
+                                    ?>
+                                        <td><button type="submit" class="btn btn-success" name="finalizar-submit">Finalizar</button></td>
+                                        <td><button type="submit" class="btn btn-danger" name="cancelar-submit">Cancelar</button></td>
+                                    <?php
+                                    } 
+                                    if (utf8_encode($dados['Status']) == "Disponível" || utf8_encode($dados['Status']) == "Em andamento") {
+                                    ?>
+                                        <td><button type="submit" class="btn btn-danger" name="cancelar-submit">Cancelar</button></td>
+                                    <?php
+                                    }
+                                    ?>
                                 </tr>
                             </form>
 

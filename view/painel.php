@@ -3,18 +3,29 @@ include "../configDB/connect.php";
 include "../login/protect.php";
 
 $sql_code = "SELECT d.ID, t.Nome AS Tipo_Servico, d.Titulo, d.Descricao, d.Previsao, d.Preco, d.Endereco, d.Status
-FROM tipo_servico t JOIN servico d ON d.Tipo_Servico = t.ID AND d.status = 4;";
-$sql_query = $conn->query($sql_code) or die("Falha na execução do código SQL: " . $conn->error);
+FROM tipo_servico t JOIN servico d ON d.Tipo_Servico = t.ID AND d.status = 4";
+try {
+    $sql_query = $conn->query($sql_code) or die("Falha na execução do código SQL: " . $conn->error);
+}catch (mysqli_sql_exception $error) {
+    echo $error;
+}
+
 $qtd = $sql_query->num_rows;
+$status_mensage = "";
 
 if (isset($_POST['prestar-submit'])) {
     $id = $_POST['ID'];
     $cpf = $_SESSION['user'];
-    $sql_baterProfissao = "SELECT count(*) FROM servico d JOIN tipo_servico t ON  d.ID = $id AND t.ID = d.Tipo_Servico JOIN usuario u ON u.cpf =  $cpf  AND u.profissao = t.ID_Profissao";
+    $tipoServ = $_POST['tipo_servico'];
+    $sql_code_baterProfissao = "SELECT count(*) as accept from usuario where cpf = $cpf and profissao in (SELECT profissao from tipo_servico_profissao t join servico s on t.tipo_servico = s.tipo_servico and s.id = $id)";
 
-    $sql_query2 = $conn->query($sql_baterProfissao) or die("Falha na execusão do código SQL: " . $conn->error);
+    try {
+        $sql_query_baterProfissao = $conn->query($sql_code_baterProfissao) or die("Falha na execusão do código SQL: " . $conn->error);
+    } catch (mysqli_sql_exception $error) {
+        echo $error;
+    }
 
-    if ($sql_query2->num_rows == 1) {
+    if ($sql_query_baterProfissao->fetch_assoc()['accept'] == 1) {
         $sql_ADD_Prestador = "UPDATE servico
         set Prestador = $cpf WHERE ID = $id";
 
@@ -28,12 +39,16 @@ if (isset($_POST['prestar-submit'])) {
             $sql_query3 = $conn->query($sql_ADD_Prestador) or die("Falha na execusão do código SQL: " . $conn->error);
             $sql_query4 = $conn->query($sql_ADD_Data_Inicio) or die("Falha na execusão do código SQL: " . $conn->error);
             $sql_query5 = $conn->query($sql_IniciarServ) or die("Falha na execusão do código SQL: " . $conn->error);
+            ?>
+            <script> alert("Serviço movido para sua responsabilidade")</script>
+            <?php
             header("Refresh:0");
         } catch (mysqli_sql_exception $error) {
             echo $error;
         }
-    }else {
-        //Do something...
+    } else {
+
+        $status_mensage = "Sua profissão não é válida para o Tipo de Servico: $tipoServ";
     }
 }
 
@@ -68,7 +83,7 @@ if (isset($_POST['prestar-submit'])) {
                         <a class="nav-link" href="painel.php">Home</a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" href="#">Perfil</a>
+                        <a class="nav-link" href="perfil.php">Perfil</a>
                     </li>
                     <li class="nav-item">
                         <a class="nav-link" href="create-service.php">Criar Serviço</a>
@@ -78,7 +93,7 @@ if (isset($_POST['prestar-submit'])) {
                     </li>
                     <li class="nav-item">
                         <a class="nav-link" href="my-services.php">Meus serviços</a>
-                    </li>     
+                    </li>
                     <li class="nav-item">
                         <a class="nav-link" href="../login/logout.php">Sair</a>
                     </li>
@@ -90,6 +105,10 @@ if (isset($_POST['prestar-submit'])) {
     </header>
 
     <div class="container">
+        <div class="status-mensage">
+            <label><?php echo $status_mensage ?></label>
+        </div>
+
         <div class="row">
             <div class="col">
                 <form action="" method="get">

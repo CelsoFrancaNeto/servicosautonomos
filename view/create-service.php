@@ -2,7 +2,7 @@
 include "../configDB/connect.php";
 include "../login/protect.php";
 
-$sql_code_all_services = "SELECT Nome FROM Tipo_Servico GROUP BY nome";
+$sql_code_all_services = "SELECT Nome, ID FROM Tipo_Servico";
 $sql_code_all_professions = "SELECT * FROM Profissao";
 $error_mensage = "";
 try {
@@ -17,16 +17,55 @@ if (isset($_POST['enviarTipoServ'])) {
     $nome =  utf8_decode($_POST['nomeAddTipoServico']);
     $descricao =  utf8_decode($_POST['descricaoAddTipoServico']);
 
-    for ($i = 0; $i < sizeof($profissoes); $i++) {
-        $sql_add_tipo_serv = "INSERT INTO tipo_servico (Nome,Descricao,ID_Profissao)
-        VALUES ('$nome','$descricao',$profissoes[$i])";
-        try {
-            $sql_query_insert_tipo_serv = $conn->query($sql_add_tipo_serv) or die("Falha na execusão do código SQL: " . $conn->error);
-            header("Refresh: 0");
-            $error_mensage = "Tipo de Serviço criado com sucesso!";
-        } catch (mysqli_sql_exception $error) {
-            echo $error;
+    $sql_add_tipo_serv = "INSERT INTO tipo_servico (Nome,Descricao)
+    VALUES ('$nome','$descricao')";
+
+    try {
+        $sql_query_insert_tipo_serv = $conn->query($sql_add_tipo_serv) or die("Falha na execusão do código SQL: " . $conn->error);
+    } catch (mysqli_sql_exception $error) {
+        echo $error;
+    }
+
+    $sql_code_search_tipo_serv = "SELECT ID FROM tipo_servico WHERE Nome = '$nome'";
+
+    try {
+        $sql_query_search_tipo_serv = $conn->query($sql_code_search_tipo_serv) or die("Falha na execusão do código SQL: " . $conn->error);
+    } catch (mysqli_sql_exception $error) {
+        echo $error;
+    }
+
+    if ($sql_query_search_tipo_serv->num_rows == 1) {
+        $idTipo = $sql_query_search_tipo_serv->fetch_assoc()['ID'];
+
+        for ($i = 0; $i < sizeof($profissoes); $i++) {
+            $sql_code_add_tipo_profissao = "INSERT INTO tipo_servico_profissao VALUES ($idTipo,$profissoes[$i])";
+            try {
+                $sql_query_add_tipo_profissao = $conn->query($sql_code_add_tipo_profissao) or die("Falha na execusão do código SQL: " . $conn->error);
+            } catch (mysqli_sql_exception $error) {
+                echo $error;
+            }
         }
+    }
+}
+
+if (isset($_POST['enviarServ'])) {
+    $tipoServ = $_POST['tipoServPostarServ'];
+    $tituloServ = utf8_decode($_POST['tituloPostarServ']);
+    $descricaoServ = utf8_decode($_POST['descricaoPostarServ']);
+    $previsaoServ = utf8_decode($_POST['prazoPostarServ']);
+    $valorServ = $_POST['valorPostarServ'];
+    $enderecoServ = utf8_decode($_POST['enderecoPostarServ']);
+    $cpf = $_SESSION['user'];
+
+    $sql_code_enviar_servico = "INSERT INTO servico (Tipo_servico,Titulo,Descricao,Previsao,Preco,Endereco,Status,Criador)
+    VALUES ($tipoServ,'$tituloServ','$descricaoServ',$previsaoServ,$valorServ,'$enderecoServ',4,$cpf)";
+
+    try {
+
+        $sql_query_enviar_servico = $conn->query($sql_code_enviar_servico) or die("Falha na execusão do código SQL: " . $conn->error);
+        $error_mensage = "Serviço postado com sucesso!";
+    } catch (mysqli_sql_exception $error) {
+        echo $error;
     }
 }
 ?>
@@ -68,7 +107,7 @@ if (isset($_POST['enviarTipoServ'])) {
                         <a class="nav-link" href="painel.php">Home</a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link" href="#">Perfil</a>
+                        <a class="nav-link" href="perfil.php">Perfil</a>
                     </li>
                     <li class="nav-item">
                         <a class="nav-link" href="#">Criar Serviço</a>
@@ -95,21 +134,21 @@ if (isset($_POST['enviarTipoServ'])) {
         <div class="container">
 
 
-            <form>
+            <form action="" method="post">
                 <div class="error-mensage">
                     <label for=""><?php echo $error_mensage ?></label>
                 </div>
                 <div class="form-group">
                     <label for="exampleFormControlInput1">Título</label>
-                    <input type="email" class="form-control" id="exampleFormContrInput1" placeholder="Exemplo: Conserto de cano">
+                    <input name="tituloPostarServ" type="text" class="form-control" id="exampleFormContrInput1" placeholder="Exemplo: Conserto de cano">
                 </div>
                 <div class="form-group">
                     <label for="exampleFormControlSelect1">Tipo de serviço</label>
-                    <select class="selectpicker form-control" data-live-search="true" id="input1">
+                    <select name="tipoServPostarServ" class="selectpicker form-control" data-live-search="true" id="input1">
                         <?php
                         while ($dados = $sql_query->fetch_assoc()) {
                         ?>
-                            <option> <?php echo utf8_encode($dados['Nome']) ?></option>
+                            <option value="<?php echo utf8_encode($dados['ID']) ?>"> <?php echo utf8_encode($dados['Nome']) ?></option>
 
                         <?php
                         }
@@ -118,18 +157,22 @@ if (isset($_POST['enviarTipoServ'])) {
                 </div>
                 <div class="form-group">
                     <label for="exampleFormControlTextarea1">Descrição</label>
-                    <textarea class="form-control" id="exampleFormControlTextarea1" rows="3"></textarea>
+                    <textarea name="descricaoPostarServ" class="form-control" id="exampleFormControlTextarea1" rows="3"></textarea>
                 </div>
                 <div class="form-group">
                     <label for="exampleFormContrInput2">Valor</label>
-                    <input type="number" class="form-control" id="exampleFormContrInput2" placeholder="Informe o valor do serviço">
+                    <input name="valorPostarServ" type="number" class="form-control" id="exampleFormContrInput2" placeholder="Informe o valor do serviço">
                 </div>
                 <div class="form-group">
                     <label for="exampleFormContrInput3">Prazo</label>
-                    <input type="number" class="form-control" id="exampleFormContrInput3" placeholder="Informe o prazo em número de dias">
+                    <input name="prazoPostarServ" type="number" class="form-control" id="exampleFormContrInput3" placeholder="Informe o prazo em número de dias">
+                </div>
+                <div class="form-group">
+                    <label for="exampleFormContrInput3">Endereço</label>
+                    <input name="enderecoPostarServ" type="text" class="form-control" id="exampleFormContrInput3" placeholder="Informe o endereço do serviço">
                 </div>
                 <div class="form-group" id="submit-buttom">
-                    <button type="submit" class="btn btn-success" name="prestar-submit">Postar Serviço</button>
+                    <button name="enviarServ" type="submit" class="btn btn-success">Postar Serviço</button>
                     <button type="button" class="btn btn-info" data-toggle="modal" data-target="#myModal">Criar Tipo de Serviço</button>
                 </div>
             </form>

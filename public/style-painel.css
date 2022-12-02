@@ -37,7 +37,7 @@ div.modal-body {
     color: green;
 }
 
-.servCamp {}
+
 
 #descCampForm {
     height: 400px;
@@ -78,4 +78,45 @@ textarea {
     text-align: center;
     color: green;
     font-weight: bold;
+}
+
+.status-mensage {
+    text-align: center;
+    color: red;
+    font-weight: bold;
+}
+
+.title {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+}
+
+.content {
+    display: flex; 
+    align-items: center;
+    justify-content: space-between;
+}
+#valor_a_receber {
+    color: green;
+}
+#valor_a_pagar {
+    color: red;
+}
+h1,h3 {
+    padding: 10px;
+}
+.inputbutton {
+    display: flex;
+    padding: 10px;
+
+}
+.filter {
+    display: flex;
+    justify-content: center;
+}
+.tipoServicoList {
+    display: flex;
+    justify-content: center;
 }
